@@ -1,0 +1,8 @@
+# 実行時に生成される個人データ（利用率・リセット時刻）。絶対にコミットしない。
+usage.json
+.claude-usage-widget/
+
+# 依存・OS
+node_modules/
+.DS_Store
+bun.lockb

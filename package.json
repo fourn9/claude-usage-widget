@@ -1,0 +1,12 @@
+{
+  "name": "claude-usage-widget",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Übersicht widget that shows Claude Code usage (session / weekly limits) on the macOS desktop",
+  "scripts": {
+    "test": "bun test backend/lib/",
+    "install-widget": "./install.sh",
+    "uninstall-widget": "./uninstall.sh"
+  },
+  "license": "MIT"
+}
