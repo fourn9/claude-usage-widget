@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 #
-# claude-usage-widget uninstaller
-#   - Übersicht のウィジェットと ~/.claude-usage-widget/ を削除する
+# claude-usage-widget uninstaller (SwiftBar 版)
+#   - SwiftBar プラグインと ~/.claude-usage-widget/ を削除する
 #
 set -euo pipefail
 
 WIDGET_HOME="$HOME/.claude-usage-widget"
-UEBERSICHT_WIDGETS="$HOME/Library/Application Support/Übersicht/widgets"
 
 echo "==> claude-usage-widget をアンインストール"
-rm -f  "$UEBERSICHT_WIDGETS/claude-usage.jsx"
+
+PLUGIN_DIR="$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null || true)"
+PLUGIN_DIR="${PLUGIN_DIR/#\~/$HOME}"
+if [ -n "$PLUGIN_DIR" ]; then
+  rm -f "$PLUGIN_DIR/claude-usage.30s.ts"
+fi
+
 rm -rf "$WIDGET_HOME"
-echo "✅ 削除しました。Übersicht を Refresh してください（必要なら再起動）。"
+echo "✅ 削除しました。SwiftBar を Refresh してください（必要なら再起動）。"
