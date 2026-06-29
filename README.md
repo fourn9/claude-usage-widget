@@ -20,8 +20,7 @@ macOS の**メニューバー**に、**Claude Code の使用状況**（現在の
 └─────────────────────────────┘
 ```
 
-- 使用率に応じてメニューバー文字の色が変わる（〜80% 青 / 80%〜 橙 / 95%〜 赤）。
-- メニューバーは省スペースに `{セッション%}% -{残り時間}h`（残りは小数1桁の時間）。
+- メニューバーは使用率メーターのアイコン＋白文字でコンパクトに `{セッション%}% -{残り時間}h`（残りは小数1桁の時間）。
 - 詳細ドロップダウンに週間制限（全体 / Sonnet / Opus）とリセット時刻を表示。
 
 > **⚠️ 非公式ツールです。** このプラグインは Anthropic 非公式・非ドキュメントのエンドポイント
@@ -114,7 +113,7 @@ cd claude-usage-widget
 
 | 変更したいこと | 場所 |
 |----------------|------|
-| 色のしきい値（橙/赤になる%） | `backend/lib/format.js` の `WARN = 80` / `DANGER = 95` |
+| メニューバーのアイコン | `swiftbar/claude-usage.30s.ts` の `sfimage=gauge.medium`（SF Symbol 名） |
 | メニューバー/ドロップダウンの文言 | `backend/lib/format.js`（`menuBarTitle` / `dropdownRows`） |
 | 表示の更新間隔 | プラグインのファイル名 `claude-usage.30s.ts` の `30s` を変更（例 `1m`） |
 | API 取得の間隔 / バックオフ | `backend/fetch-usage.ts` の `OK_INTERVAL_MS` / `BACKOFF_MS` |

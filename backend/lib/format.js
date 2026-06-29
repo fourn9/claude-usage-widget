@@ -5,9 +5,6 @@
 // に整形する。副作用なし。SwiftBar 記法の組み立て（| color= 等）と
 // アクション行（更新・リンク）はプラグイン側（swiftbar/claude-usage.30s.ts）の責務。
 
-export const WARN = 80; // この%以上で橙
-export const DANGER = 95; // この%以上で赤
-
 function pad(n) {
   return n < 10 ? "0" + n : "" + n;
 }
@@ -71,17 +68,6 @@ export function menuBarTitle(d, now = Date.now()) {
   const pct = Math.round(slot.pct);
   const rest = slot.resets_at ? ` -${remainingHours(slot.resets_at, now)}` : "";
   return `${pct}%${rest}`;
-}
-
-// メニューバー文字色。基本は白で、上限が近いときだけ警告色にする
-// （>= WARN 橙 / >= DANGER 赤）。データ無しも白。
-export function menuBarColor(d) {
-  const slot = primarySlot(d);
-  if (!slot) return "white";
-  const pct = Math.round(slot.pct);
-  if (pct >= DANGER) return "#ff5a52";
-  if (pct >= WARN) return "#ffae42";
-  return "white";
 }
 
 // ドロップダウンの情報行。区切りは "---"（プラグインが SwiftBar の区切りに変換）。
