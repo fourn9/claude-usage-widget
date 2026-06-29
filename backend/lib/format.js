@@ -8,13 +8,6 @@
 export const WARN = 80; // この%以上で橙
 export const DANGER = 95; // この%以上で赤
 
-// 使用率に応じた色（旧 jsx と同一しきい値）
-export function barColor(pct) {
-  if (pct >= DANGER) return "#ff5a52";
-  if (pct >= WARN) return "#ffae42";
-  return "#4a8cff";
-}
-
 function pad(n) {
   return n < 10 ? "0" + n : "" + n;
 }
@@ -80,10 +73,15 @@ export function menuBarTitle(d, now = Date.now()) {
   return `${pct}%${rest}`;
 }
 
-// メニューバー文字色（主スロットの使用率しきい値）。データ無しは null
+// メニューバー文字色。基本は白で、上限が近いときだけ警告色にする
+// （>= WARN 橙 / >= DANGER 赤）。データ無しも白。
 export function menuBarColor(d) {
   const slot = primarySlot(d);
-  return slot ? barColor(Math.round(slot.pct)) : null;
+  if (!slot) return "white";
+  const pct = Math.round(slot.pct);
+  if (pct >= DANGER) return "#ff5a52";
+  if (pct >= WARN) return "#ffae42";
+  return "white";
 }
 
 // ドロップダウンの情報行。区切りは "---"（プラグインが SwiftBar の区切りに変換）。

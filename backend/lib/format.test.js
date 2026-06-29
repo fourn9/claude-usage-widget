@@ -2,7 +2,6 @@ import { test, expect } from "bun:test";
 import {
   WARN,
   DANGER,
-  barColor,
   remainingHours,
   countdown,
   clockHM,
@@ -18,19 +17,6 @@ const NOW = Date.parse("2026-06-28T11:13:17.547Z");
 const inHours = (h) => new Date(NOW + h * 3600000).toISOString();
 const inMin = (m) => new Date(NOW + m * 60000).toISOString();
 
-// --- barColor: しきい値 80/95 の境界 ---
-test("barColor: 80%未満は通常色（青）", () => {
-  expect(barColor(0)).toBe("#4a8cff");
-  expect(barColor(79)).toBe("#4a8cff");
-});
-test("barColor: 80%以上95%未満は橙", () => {
-  expect(barColor(80)).toBe("#ffae42");
-  expect(barColor(94)).toBe("#ffae42");
-});
-test("barColor: 95%以上は赤", () => {
-  expect(barColor(95)).toBe("#ff5a52");
-  expect(barColor(100)).toBe("#ff5a52");
-});
 test("WARN/DANGER の定数", () => {
   expect(WARN).toBe(80);
   expect(DANGER).toBe(95);
@@ -100,13 +86,17 @@ test("menuBarTitle: データ無しは 'Claude …'", () => {
   expect(menuBarTitle({ session: null, weekly: null }, NOW)).toBe("Claude …");
 });
 
-// --- menuBarColor: セッション pct のしきい値色 ---
-test("menuBarColor: セッション pct で着色", () => {
-  expect(menuBarColor({ session: { pct: 96 } })).toBe("#ff5a52");
-  expect(menuBarColor({ session: { pct: 3 } })).toBe("#4a8cff");
+// --- menuBarColor: 基本は白、上限が近いときだけ警告色 ---
+test("menuBarColor: 通常は白", () => {
+  expect(menuBarColor({ session: { pct: 3 } })).toBe("white");
+  expect(menuBarColor({ session: { pct: 79 } })).toBe("white");
 });
-test("menuBarColor: データ無しは null", () => {
-  expect(menuBarColor({ session: null, weekly: null })).toBe(null);
+test("menuBarColor: >=80% は橙、>=95% は赤", () => {
+  expect(menuBarColor({ session: { pct: 80 } })).toBe("#ffae42");
+  expect(menuBarColor({ session: { pct: 96 } })).toBe("#ff5a52");
+});
+test("menuBarColor: データ無しも白", () => {
+  expect(menuBarColor({ session: null, weekly: null })).toBe("white");
 });
 
 // --- dropdownRows: 行の増減 ---

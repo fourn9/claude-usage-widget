@@ -28,8 +28,10 @@ const REPO_URL = "https://github.com/fourn9/claude-usage-widget";
 const FETCH_TIMEOUT_MS = 5000; // フェッチャがこれ以上かかったら諦めてキャッシュ表示
 
 // メニューバー1行＋区切り＋ドロップダウン行を SwiftBar 記法で出力する。
-function emit(menuBar: string, color: string | null, rows: string[]) {
-  console.log(color ? `${menuBar} | color=${color}` : menuBar);
+// メニューバーには使用率メーターのアイコン（SF Symbol: gauge.medium）を付け、
+// 文字色は基本白・上限が近いときだけ警告色（color 引数）にする。
+function emit(menuBar: string, color: string, rows: string[]) {
+  console.log(`${menuBar} | color=${color} sfimage=gauge.medium`);
   console.log("---");
   for (const r of rows) console.log(r); // "---" はそのまま区切りとして出力される
   console.log("---");
@@ -86,7 +88,7 @@ async function main() {
 
   if (!d) {
     // 一度もデータが無い（初回・未ログイン等）
-    emit("Claude …", null, [
+    emit("Claude …", "white", [
       "データ取得待ち — Claude Code が起動中か確認してください",
       "（初回は最大5分ほどかかります）",
     ]);
