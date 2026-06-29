@@ -1,8 +1,8 @@
 {
   "name": "claude-usage-widget",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Übersicht widget that shows Claude Code usage (session / weekly limits) on the macOS desktop",
+  "description": "SwiftBar plugin that shows Claude Code usage (session / weekly limits) in the macOS menu bar",
   "scripts": {
     "test": "bun test backend/lib/",
     "install-widget": "./install.sh",
