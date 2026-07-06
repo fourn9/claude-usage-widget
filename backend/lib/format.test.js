@@ -122,3 +122,38 @@ test("dropdownRows: データ無しは取得待ち1行", () => {
   expect(rows.length).toBe(1);
   expect(rows[0]).toContain("データ取得待ち");
 });
+
+// ---- orchestratorRows ----
+import { orchestratorRows, orchStatusFresh } from "./format.js";
+
+test("orchestratorRows: 稼働中はキュー・実行中・要確認と優先度アクションを出す", () => {
+  const now = Date.now();
+  const st = {
+    now: now / 1000 - 30,
+    running: { task_id: "r1" },
+    queue: [{ task_id: "q1", deadline: now / 1000 + 3600, priority: 0 }],
+    needs_clarification: ["c1"],
+  };
+  const rows = orchestratorRows(st, now, { python: "/x/py", tasksDir: "/x/t" });
+  const joined = rows.join("\n");
+  expect(joined).toContain("稼働中");
+  expect(joined).toContain("▶️ 実行中: r1");
+  expect(joined).toContain("🔝");
+  expect(joined).toContain("param3=priority param4=q1 param5=0");
+  expect(joined).toContain("❓ 要確認: c1");
+});
+
+test("orchestratorRows: statusが無い/古いときは実行アクションを出さない", () => {
+  const now = Date.now();
+  expect(orchestratorRows(null, now).join("\n")).toContain("状態不明");
+  const stale = orchestratorRows({ now: now / 1000 - 600, queue: [{ task_id: "q" }] }, now);
+  expect(stale.join("\n")).toContain("停止中");
+  expect(stale.join("\n")).not.toContain("bash=");
+});
+
+test("orchStatusFresh: 120秒閾値", () => {
+  const now = Date.now();
+  expect(orchStatusFresh({ now: now / 1000 - 60 }, now)).toBe(true);
+  expect(orchStatusFresh({ now: now / 1000 - 300 }, now)).toBe(false);
+  expect(orchStatusFresh(null, now)).toBe(false);
+});

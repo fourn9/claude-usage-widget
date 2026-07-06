@@ -9,6 +9,8 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WIDGET_HOME="$HOME/.claude-usage-widget"
+# オーケストレータ(claude-management)のリポジトリ位置(ドロップダウン連携用)
+ORCH_DIR="${ORCH_DIR:-$HOME/Desktop/Findy/Claude/iroiro/claude-management}"
 
 echo "==> claude-usage-widget installer (SwiftBar)"
 
@@ -50,6 +52,7 @@ echo "==> プラグインを SwiftBar に配置"
 PLUGIN_DST="$PLUGIN_DIR/claude-usage.30s.ts"
 sed -e "s|__BUN_BIN__|$BUN_BIN|g" \
     -e "s|__WIDGET_HOME__|$WIDGET_HOME|g" \
+    -e "s|__ORCH_DIR__|$ORCH_DIR|g" \
     "$REPO_DIR/swiftbar/claude-usage.30s.ts" > "$PLUGIN_DST"
 chmod +x "$PLUGIN_DST"
 

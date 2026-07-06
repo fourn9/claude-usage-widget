@@ -27,6 +27,22 @@ const CACHE = `${WIDGET_HOME}/usage.json`;
 const REPO_URL = "https://github.com/fourn9/claude-usage-widget";
 const FETCH_TIMEOUT_MS = 5000; // フェッチャがこれ以上かかったら諦めてキャッシュ表示
 
+// オーケストレータ連携（claude-management）: status.json をローカル直読みし、
+// 優先度変更もローカルCLI実行。Claude API接続・追加トークンは不要。
+const ORCH_DIR = "__ORCH_DIR__";
+const ORCH_OPTS = {
+  python: `${ORCH_DIR}/.venv/bin/python`,
+  tasksDir: `${ORCH_DIR}/tasks`,
+};
+
+function readOrchStatus(): any {
+  try {
+    return JSON.parse(readFileSync(`${ORCH_DIR}/status.json`, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
 // メニューバー1行＋区切り＋ドロップダウン行を SwiftBar 記法で出力する。
 // メニューバーには使用率メーターのアイコン（SF Symbol: gauge.medium）を付け、
 // 文字色は常に白にする。
@@ -95,9 +111,31 @@ async function main() {
     return;
   }
 
-  const fmt = await import(`file://${WIDGET_HOME}/lib/format.js`);
-  const now = Date.now();
-  emit(fmt.menuBarTitle(d, now), fmt.dropdownRows(d, now));
+  // 整形ロジックの読み込み・実行が失敗しても、メニューバーから消えないよう
+  // ここで握り潰して素のキャッシュ値を直接出す（必ず1行は出力する）。
+  try {
+    const fmt = await import(`file://${WIDGET_HOME}/lib/format.js`);
+    const now = Date.now();
+    const rows = fmt.dropdownRows(d, now);
+    // オーケストレータ節（読めない/壊れていても使用量表示は守る）
+    try {
+      rows.push(...fmt.orchestratorRows(readOrchStatus(), now, ORCH_OPTS));
+    } catch {}
+    emit(fmt.menuBarTitle(d, now), rows);
+  } catch {
+    const slot = d.session || d.weekly || null;
+    const title = slot ? `${Math.round(slot.pct)}%` : "Claude …";
+    emit(title, ["⚠️ 整形に失敗 — usage.json は取得済みです"]);
+  }
 }
 
-await main();
+// SwiftBar は「出力が空＝メニューバー項目を消す」挙動のため、
+// 何が起きても必ず最後に1行は出力して項目を固定表示し続ける。
+try {
+  await main();
+} catch {
+  console.log("Claude … | color=white sfimage=gauge.medium");
+  console.log("---");
+  console.log("⚠️ 一時的にデータを取得できません（次回更新で復帰します）");
+  console.log("🔄 今すぐ更新 | refresh=true");
+}

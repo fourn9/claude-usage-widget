@@ -107,3 +107,61 @@ export function dropdownRows(d, now = Date.now()) {
 
   return rows;
 }
+
+// ---- オーケストレータ連携（claude-management） ----
+// status.json（オーケストレータが毎ループ書くローカルファイル）を整形して
+// ドロップダウン節にする。優先度変更はローカルCLI実行（API・トークン不要）。
+// opts: { python, tasksDir } — クリックアクション用の絶対パス。
+export function orchStatusFresh(status, now = Date.now(), maxAgeMs = 120000) {
+  return !!(status && status.now && now - status.now * 1000 < maxAgeMs);
+}
+
+function fmtEpoch(sec) {
+  if (sec == null) return "なし";
+  const d = new Date(sec * 1000);
+  return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${pad(d.getMinutes())}`;
+}
+
+function priorityActions(taskId, opts) {
+  const act = (label, n) =>
+    `-- ${label} | bash=${opts.python} param1=-m param2=orchestrator.intake ` +
+    `param3=priority param4=${taskId} param5=${n} param6=${opts.tasksDir} ` +
+    `terminal=false refresh=true`;
+  return [
+    act("🔝 最優先にする（締切より先に実行）", 0),
+    act("⬆️ 優先度高（50）", 50),
+    act("➖ 標準（100）", 100),
+    act("⬇️ 優先度低（200）", 200),
+  ];
+}
+
+export function orchestratorRows(status, now = Date.now(), opts = null) {
+  const rows = ["---"];
+  if (!status) {
+    rows.push("🤖 オーケストレータ  状態不明（status.json なし）");
+    return rows;
+  }
+  if (!orchStatusFresh(status, now)) {
+    const ageMin = status.now ? Math.round((now - status.now * 1000) / 60000) : null;
+    rows.push(`🤖 オーケストレータ  ⚠️ 停止中?（最終更新 ${ageMin ?? "?"}分前）`);
+    return rows;
+  }
+  rows.push("🤖 オーケストレータ  稼働中");
+  if (status.running) {
+    rows.push(`▶️ 実行中: ${status.running.task_id}`);
+  }
+  const queue = status.queue || [];
+  if (queue.length === 0 && !status.running) {
+    rows.push("キュー: なし");
+  }
+  for (const q of queue) {
+    const prio = q.priority ?? 100;
+    const mark = prio <= 0 ? "🔝" : prio !== 100 ? `優先度${prio} ` : "";
+    rows.push(`⏳ ${q.task_id}（${mark}締切 ${fmtEpoch(q.deadline)}）`);
+    if (opts) rows.push(...priorityActions(q.task_id, opts));
+  }
+  for (const c of status.needs_clarification || []) {
+    rows.push(`❓ 要確認: ${c}（Slackスレッドで締切を返信）`);
+  }
+  return rows;
+}
