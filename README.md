@@ -116,6 +116,7 @@ cd claude-usage-widget
 | メニューバーのアイコン | `swiftbar/claude-usage.30s.ts` の `sfimage=gauge.medium`（SF Symbol 名） |
 | メニューバー/ドロップダウンの文言 | `backend/lib/format.js`（`menuBarTitle` / `dropdownRows`） |
 | 表示の更新間隔 | プラグインのファイル名 `claude-usage.30s.ts` の `30s` を変更（例 `1m`） |
+| オーケストレータ節の表示 | `ORCH_DIR="" ./install.sh` で非表示（節ごと出さない）。別の場所を見るなら `ORCH_DIR=/path/to/claude-management ./install.sh`。選択は `~/.claude-usage-widget/install.env` に保存され、次回以降の `./install.sh` でも維持される |
 | API 取得の間隔 / バックオフ | `backend/fetch-usage.ts` の `OK_INTERVAL_MS` / `BACKOFF_MS` |
 
 > 変更後は `~/.claude-usage-widget/` への再配置が必要です（`./install.sh` を再実行）。
