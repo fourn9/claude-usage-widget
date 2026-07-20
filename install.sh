@@ -10,7 +10,15 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WIDGET_HOME="$HOME/.claude-usage-widget"
 # オーケストレータ(claude-management)のリポジトリ位置(ドロップダウン連携用)
-ORCH_DIR="${ORCH_DIR:-$HOME/Desktop/Findy/Claude/iroiro/claude-management}"
+#   ORCH_DIR="" を指定すると連携を無効化し、ドロップダウンにその節を出さない。
+#   決定順: 環境変数 > このマシンの設定(install.env) > 既定値。
+#   （":-" ではなく "-" にして、明示的な空文字を尊重する）
+CONFIG_FILE="$WIDGET_HOME/install.env"
+if [ -z "${ORCH_DIR+set}" ] && [ -f "$CONFIG_FILE" ]; then
+  # shellcheck source=/dev/null
+  . "$CONFIG_FILE"
+fi
+ORCH_DIR="${ORCH_DIR-$HOME/Desktop/Findy/Claude/iroiro/claude-management}"
 
 echo "==> claude-usage-widget installer (SwiftBar)"
 
@@ -46,6 +54,14 @@ echo "==> backend を $WIDGET_HOME に配置"
 mkdir -p "$WIDGET_HOME/lib"
 cp "$REPO_DIR/backend/fetch-usage.ts"  "$WIDGET_HOME/fetch-usage.ts"
 cp "$REPO_DIR/backend/lib/format.js"   "$WIDGET_HOME/lib/format.js"
+
+# このマシンの選択を保存（次回の install.sh で env 指定なしでも維持される）
+printf 'ORCH_DIR=%s\n' "$(printf '%q' "$ORCH_DIR")" > "$CONFIG_FILE"
+if [ -n "$ORCH_DIR" ]; then
+  echo "    orchestrator: $ORCH_DIR"
+else
+  echo "    orchestrator: 無効（ドロップダウンに節を出しません）"
+fi
 
 # 3. プラグインを生成（プレースホルダを実パスに置換し実行権限を付与） -----
 echo "==> プラグインを SwiftBar に配置"
