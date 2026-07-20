@@ -14,9 +14,9 @@
 // install.sh が __BUN_BIN__ / __WIDGET_HOME__ を絶対パスに置換し、実行権限を付与する。
 //
 // <swiftbar.title>Claude Usage</swiftbar.title>
-// <swiftbar.version>2.0.0</swiftbar.version>
+// <swiftbar.version>2.1.0</swiftbar.version>
 // <swiftbar.author>fourn9</swiftbar.author>
-// <swiftbar.desc>Claude Code のセッション/週間使用率をメニューバーに表示</swiftbar.desc>
+// <swiftbar.desc>Claude Code session / weekly usage in the menu bar</swiftbar.desc>
 // <swiftbar.refreshOnOpen>true</swiftbar.refreshOnOpen>
 
 import { readFileSync } from "node:fs";
@@ -51,9 +51,9 @@ function emit(menuBar: string, rows: string[]) {
   console.log("---");
   for (const r of rows) console.log(r); // "---" はそのまま区切りとして出力される
   console.log("---");
-  console.log("🔄 今すぐ更新 | refresh=true");
-  console.log(`📄 usage.json を開く | href=file://${CACHE}`);
-  console.log(`🔗 リポジトリ | href=${REPO_URL}`);
+  console.log("Refresh now | refresh=true sfimage=arrow.clockwise");
+  console.log(`Open usage.json | href=file://${CACHE} sfimage=doc.text`);
+  console.log(`Repository | href=${REPO_URL} sfimage=link`);
 }
 
 // fetch-usage.ts をタイムアウト付きで実行し、最新の JSON 文字列を取得（失敗時は null）。
@@ -105,8 +105,8 @@ async function main() {
   if (!d) {
     // 一度もデータが無い（初回・未ログイン等）
     emit("Claude …", [
-      "データ取得待ち — Claude Code が起動中か確認してください",
-      "（初回は最大5分ほどかかります）",
+      "Waiting for data — make sure Claude Code is signed in",
+      "First fetch can take up to 5 minutes | size=11 color=#8a8a8a,#a0a0a0",
     ]);
     return;
   }
@@ -125,7 +125,7 @@ async function main() {
   } catch {
     const slot = d.session || d.weekly || null;
     const title = slot ? `${Math.round(slot.pct)}%` : "Claude …";
-    emit(title, ["⚠️ 整形に失敗 — usage.json は取得済みです"]);
+    emit(title, ["⚠️ Formatting failed — usage.json was fetched successfully"]);
   }
 }
 
@@ -136,6 +136,6 @@ try {
 } catch {
   console.log("Claude … | color=white sfimage=gauge.medium");
   console.log("---");
-  console.log("⚠️ 一時的にデータを取得できません（次回更新で復帰します）");
-  console.log("🔄 今すぐ更新 | refresh=true");
+  console.log("⚠️ Temporarily unable to fetch data — will recover on next refresh");
+  console.log("Refresh now | refresh=true sfimage=arrow.clockwise");
 }
